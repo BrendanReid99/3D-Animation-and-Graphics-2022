@@ -1,0 +1,6 @@
+**/.DS_Store
+.vscode
+*.exe
+build_tools/
+build/
+build/**
