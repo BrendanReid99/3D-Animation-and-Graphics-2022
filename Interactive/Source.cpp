@@ -237,7 +237,11 @@ void startup()
 
 	cout << endl << "Loading content..." << endl;	
 	//content.LoadGLTF("assets/dog.gltf");
-	content.LoadGLTF("assets/raft.gltf");
+
+	//COMMENT FOR RICH: Load objects here (have chosen 2 to show issue)
+	//(Render function on line 308)
+	content.LoadGLTF("assets/raft.gltf");				//loading raft model exported from Blender project
+	content.LoadGLTF("assets/rocks.gltf");				//loading rock model exported from Blender project
 
 	pipeline.CreatePipeline();
 	pipeline.LoadShaders("shaders/vs_model.glsl", "shaders/fs_model.glsl");
@@ -326,13 +330,15 @@ void render()
 									   cameraPosition + cameraFront, // centre
 									   cameraUp);					 // up
 
+	//COMMENT FOR RICH: This deals with the first model (raft) however, trying to deal with more than 1 model (rocks too) and a bit confused on how to write this more
+	// optimally so it can deal with all loaded content models in the startup function!
+	// 
 	// Do some translations, rotations and scaling
 	// glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(modelPosition.x+rX, modelPosition.y+rY, modelPosition.z+rZ));
 	glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 	modelMatrix = glm::rotate(modelMatrix, modelRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	modelMatrix = glm::rotate(modelMatrix, modelRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	modelMatrix = glm::rotate(modelMatrix, modelRotation.z, glm::vec3(0.0f, 0.0f, 1.0f)); //added rotation for the z axis of the model
-	//modelMatrix = glm::perspectiveLH(modelMatrix, cameraPosition.z, glm::vec3(0.0f, 0.0f, 1.0f)); //added offset for camera position with z axis 
 
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
 
