@@ -45,6 +45,7 @@ void update();
 void render();
 void ui();
 void endProgram();
+//void scroll_callback(); was doing this for mouse scroll but found the callback function at the bottom of the file!
 
 // HELPER FUNCTIONS OPENGL
 void hintsGLFW();
@@ -73,15 +74,15 @@ void onMouseWheelCallback(GLFWwindow *window, double xoffset, double yoffset);
 
 // VARIABLES
 GLFWwindow *window; 								// Keep track of the window
-auto windowWidth = 800;								// Window width					
-auto windowHeight =800;								// Window height
+auto windowWidth = 1920;							// Window width (updated to run 1920 by Brendan)			
+auto windowHeight =1080;							// Window height (updated to run 1080 by Brendan)
 auto running(true);							  		// Are we still running our main loop
 mat4 projMatrix;							 		// Our Projection Matrix
 vec3 cameraPosition = vec3(0.0f, 0.0f, 5.0f);		// Where is our camera
 vec3 cameraFront = vec3(0.0f, 0.0f, -1.0f);			// Camera front vector
 vec3 cameraUp = vec3(0.0f, 1.0f, 0.0f);				// Camera up vector
 auto aspect = (float)windowWidth / (float)windowHeight;	// Window aspect ration
-auto fovy = 45.0f;									// Field of view (y axis)
+auto fovy = 95.0f;									// Field of view (y axis), updated to 95 here for nicer view by Brendan
 bool keyStatus[1024];								// Track key strokes
 auto currentTime = 0.0f;							// Framerate
 auto deltaTime = 0.0f;								// time passed
@@ -93,6 +94,7 @@ Debugger debugger;									// Add one debugger to use for callbacks ( Win64 - op
 
 vec3 modelPosition;									// Model position
 vec3 modelRotation;									// Model rotation
+
 
 
 int main()
@@ -113,7 +115,7 @@ int main()
 	// window = glfwCreateWindow(windowWidth, windowHeight, title.c_str(), glfwGetPrimaryMonitor(), NULL); // fullscreen
 
 	// Create our Window
-	const auto windowTitle = "My 3D Graphics and Animation OpenGL Application"s;
+	const auto windowTitle = "Stranded Interactive Version - Brendan Reid (openGL) "s;
 	window = glfwCreateWindow(windowWidth, windowHeight, windowTitle.c_str(), NULL, NULL);
 	if (!window) // Test if Window or OpenGL context creation failed
 	{
@@ -234,7 +236,8 @@ void startup()
 	cout << "RENDERER: " << (char *)glGetString(GL_RENDERER) << endl;	
 
 	cout << endl << "Loading content..." << endl;	
-	content.LoadGLTF("assets/dog.gltf");
+	//content.LoadGLTF("assets/dog.gltf");
+	content.LoadGLTF("assets/raft.gltf");
 
 	pipeline.CreatePipeline();
 	pipeline.LoadShaders("shaders/vs_model.glsl", "shaders/fs_model.glsl");
@@ -261,14 +264,36 @@ void startup()
 
 void update()
 {
+	//rotation for the model (comes with the template)
 	if (keyStatus[GLFW_KEY_LEFT]) modelRotation.y += 0.05f;
 	if (keyStatus[GLFW_KEY_RIGHT]) modelRotation.y -= 0.05f;
 	if (keyStatus[GLFW_KEY_UP]) modelRotation.x += 0.05f;
 	if (keyStatus[GLFW_KEY_DOWN]) modelRotation.x -= 0.05f;
-	if (keyStatus[GLFW_KEY_W]) modelPosition.z += 0.10f;
-	if (keyStatus[GLFW_KEY_S]) modelPosition.z -= 0.10f;
+	if (keyStatus[GLFW_KEY_Z]) modelPosition.z += 0.05f;	//updated from W to Z key by Brendan also changed from 0.10 to 0.05 to keep things relative
+	if (keyStatus[GLFW_KEY_X]) modelPosition.z -= 0.05f;	//updated from S to X key by Brendan (0.10 -> 0.05 here too)
 
 	if (keyStatus[GLFW_KEY_R]) pipeline.ReloadShaders();
+
+	//interactive camera (rotation) 
+	//makes the camera moveable
+	if (keyStatus[GLFW_KEY_A]) {
+		cameraPosition.x -= 0.05f;
+	}
+	if (keyStatus[GLFW_KEY_D]) {
+		cameraPosition.x += 0.05f;
+	}
+	if (keyStatus[GLFW_KEY_W]) {
+		cameraPosition.y += 0.05f;
+	}
+	if (keyStatus[GLFW_KEY_S]) {
+		cameraPosition.y -= 0.05f;
+	}
+	if (keyStatus[GLFW_KEY_O]) {
+		cameraPosition.z += 0.05f;
+	}
+	if (keyStatus[GLFW_KEY_P]) {
+		cameraPosition.z -= 0.05f;
+	}
 
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
@@ -306,6 +331,9 @@ void render()
 	glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 	modelMatrix = glm::rotate(modelMatrix, modelRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	modelMatrix = glm::rotate(modelMatrix, modelRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	modelMatrix = glm::rotate(modelMatrix, modelRotation.z, glm::vec3(0.0f, 0.0f, 1.0f)); //added rotation for the z axis of the model
+	//modelMatrix = glm::perspectiveLH(modelMatrix, cameraPosition.z, glm::vec3(0.0f, 0.0f, 1.0f)); //added offset for camera position with z axis 
+
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
 
 	glm::mat4 mv_matrix = viewMatrix * modelMatrix;
@@ -396,6 +424,15 @@ void onMouseMoveCallback(GLFWwindow *window, double x, double y)
 void onMouseWheelCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
 	int yoffsetInt = static_cast<int>(yoffset);
+
+	fovy -= (float)yoffset;
+
+	if (fovy < 1.0f) {				//updated this function to be standard to openGL sources provided with class work (https://learnopengl.com/Getting-Started/Camera)
+		fovy = 1.0f;
+	}
+	if (fovy > 45.0f) {
+		45.0f;
+	}
 }
 
 void APIENTRY openGLDebugCallback(GLenum source,
