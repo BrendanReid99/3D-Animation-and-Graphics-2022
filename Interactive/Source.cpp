@@ -74,8 +74,8 @@ void onMouseWheelCallback(GLFWwindow *window, double xoffset, double yoffset);
 
 // VARIABLES
 GLFWwindow *window; 								// Keep track of the window
-auto windowWidth = 1920;							// Window width (updated to run 1920 by Brendan)			
-auto windowHeight =1080;							// Window height (updated to run 1080 by Brendan)
+auto windowWidth = 1024;							// Window width (updated to run 1024 by Brendan)			
+auto windowHeight = 700;							// Window height (updated to run 700 by Brendan)
 auto running(true);							  		// Are we still running our main loop
 mat4 projMatrix;							 		// Our Projection Matrix
 vec3 cameraPosition = vec3(0.0f, 0.0f, 5.0f);		// Where is our camera
@@ -90,11 +90,13 @@ auto lastTime = 0.0f;								// Used to calculate Frame rate
 
 Pipeline pipeline;									// Add one pipeline plus some shaders.
 Content content;									// Add one content loader (+drawing).
+Content raft;										// Add content for raft obj from blender project
+Content rocks;										// Add content for rocks obj from blender project
+
 Debugger debugger;									// Add one debugger to use for callbacks ( Win64 - openGLDebugCallback() ) or manual calls ( Apple - glCheckError() ) 
 
 vec3 modelPosition;									// Model position
 vec3 modelRotation;									// Model rotation
-
 
 
 int main()
@@ -238,10 +240,8 @@ void startup()
 	cout << endl << "Loading content..." << endl;	
 	//content.LoadGLTF("assets/dog.gltf");
 
-	//COMMENT FOR RICH: Load objects here (have chosen 2 to show issue)
-	//(Render function on line 308)
-	content.LoadGLTF("assets/raft.gltf");				//loading raft model exported from Blender project
-	content.LoadGLTF("assets/rocks.gltf");				//loading rock model exported from Blender project
+	raft.LoadGLTF("assets/raft.gltf");				//loading raft model exported from Blender project
+	rocks.LoadGLTF("assets/rocks.gltf");			//loading rock model exported from Blender project
 
 	pipeline.CreatePipeline();
 	pipeline.LoadShaders("shaders/vs_model.glsl", "shaders/fs_model.glsl");
@@ -330,9 +330,6 @@ void render()
 									   cameraPosition + cameraFront, // centre
 									   cameraUp);					 // up
 
-	//COMMENT FOR RICH: This deals with the first model (raft) however, trying to deal with more than 1 model (rocks too) and a bit confused on how to write this more
-	// optimally so it can deal with all loaded content models in the startup function!
-	// 
 	// Do some translations, rotations and scaling
 	// glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(modelPosition.x+rX, modelPosition.y+rY, modelPosition.z+rZ));
 	glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
@@ -348,7 +345,8 @@ void render()
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "view_matrix"), 1, GL_FALSE, &viewMatrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "proj_matrix"), 1, GL_FALSE, &projMatrix[0][0]);
 
-	content.DrawModel(content.vaoAndEbos, content.model);
+	raft.DrawModel(raft.vaoAndEbos, raft.model);
+	rocks.DrawModel(rocks.vaoAndEbos, rocks.model);
 	
 	#if defined(__APPLE__)
 		glCheckError();
