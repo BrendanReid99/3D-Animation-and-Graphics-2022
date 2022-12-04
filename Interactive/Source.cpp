@@ -72,6 +72,11 @@ void onMouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 void onMouseMoveCallback(GLFWwindow *window, double x, double y);
 void onMouseWheelCallback(GLFWwindow *window, double xoffset, double yoffset);
 
+struct renderObject {
+	Content c;
+	glm::mat4 objectMatrix;
+};
+
 // VARIABLES
 GLFWwindow *window; 								// Keep track of the window
 auto windowWidth = 1024;							// Window width (updated to run 1024 by Brendan)			
@@ -89,7 +94,7 @@ auto deltaTime = 0.0f;								// time passed
 auto lastTime = 0.0f;								// Used to calculate Frame rate
 
 Pipeline pipeline;									// Add one pipeline plus some shaders.
-Content content;									// Add one content loader (+drawing).
+//Content content;									// Add one content loader (+drawing).
 Content raft;										// Add content for raft obj from blender project
 Content rocks;										// Add content for rocks obj from blender project
 
@@ -239,7 +244,7 @@ void startup()
 
 	cout << endl << "Loading content..." << endl;	
 	//content.LoadGLTF("assets/dog.gltf");
-
+	
 	raft.LoadGLTF("assets/raft.gltf");				//loading raft model exported from Blender project
 	rocks.LoadGLTF("assets/rocks.gltf");			//loading rock model exported from Blender project
 

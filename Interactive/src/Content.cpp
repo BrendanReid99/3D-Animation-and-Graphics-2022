@@ -1,6 +1,5 @@
 #include "Content.hpp"
 
-
 Content::Content() {
 
 }
@@ -107,6 +106,7 @@ void Content::BindMesh(map<int, GLuint> &vbos, Model &model, Mesh &mesh)
 
 				GLuint texid;
 				glGenTextures(1, &texid);
+				textureID = texid;								//store map of mesh -> texture ID
 
 				tinygltf::Image &image = model.images[tex.source];
 
@@ -191,6 +191,7 @@ pair<GLuint, map<int, GLuint>> Content::BindModel(Model &model)
 
 void Content::DrawMesh(const map<int, GLuint> &vbos, Model &model, Mesh &mesh)
 {
+	glBindTexture(GL_TEXTURE_2D, textureID);					//make this mesh's texture active
 	for (size_t i = 0; i < mesh.primitives.size(); ++i)
 	{
 		Primitive primitive = mesh.primitives[i];

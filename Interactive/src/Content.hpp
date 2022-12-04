@@ -28,6 +28,8 @@ class Content {
 
 	private:
 
+		GLuint textureID;				//creating a map to store mesh
+
 		// Loading
 		pair<GLuint, map<int, GLuint>> BindModel(Model &model);
 		void BindModelNodes(map<int, GLuint> &vbos, Model &model, Node &node);
