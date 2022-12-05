@@ -72,10 +72,12 @@ void onMouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 void onMouseMoveCallback(GLFWwindow *window, double x, double y);
 void onMouseWheelCallback(GLFWwindow *window, double xoffset, double yoffset);
 
-struct renderObject {
+//creating a struct to store content and matrix for each model individually (editable further in scene)
+/*struct renderObject {
 	Content c;
-	glm::mat4 objectMatrix;
+	mat4 objectMatrix;
 };
+*/
 
 // VARIABLES
 GLFWwindow *window; 								// Keep track of the window
@@ -93,10 +95,16 @@ auto currentTime = 0.0f;							// Framerate
 auto deltaTime = 0.0f;								// time passed
 auto lastTime = 0.0f;								// Used to calculate Frame rate
 
-Pipeline pipeline;									// Add one pipeline plus some shaders.
-//Content content;									// Add one content loader (+drawing).
-Content raft;										// Add content for raft obj from blender project
-Content rocks;										// Add content for rocks obj from blender project
+Pipeline pipeline;									// Add one pipeline plus some shaders.									// Add one content loader (+drawing).
+
+//declaring each object exported from blender project
+Content raft;										
+Content rocks;										
+Content lifebuoy;									
+Content campFireSeats;								
+Content campFire;
+Content trees;
+Content beachFull;
 
 Debugger debugger;									// Add one debugger to use for callbacks ( Win64 - openGLDebugCallback() ) or manual calls ( Apple - glCheckError() ) 
 
@@ -243,10 +251,17 @@ void startup()
 	cout << "RENDERER: " << (char *)glGetString(GL_RENDERER) << endl;	
 
 	cout << endl << "Loading content..." << endl;	
-	//content.LoadGLTF("assets/dog.gltf");
 	
-	raft.LoadGLTF("assets/raft.gltf");				//loading raft model exported from Blender project
-	rocks.LoadGLTF("assets/rocks.gltf");			//loading rock model exported from Blender project
+	//Loading each exported GLTF object from blender project
+	raft.LoadGLTF("assets/raft.gltf");						
+	rocks.LoadGLTF("assets/rocks.gltf");					
+	lifebuoy.LoadGLTF("assets/lifebuoy.gltf");				
+	campFireSeats.LoadGLTF("assets/campfireseat.gltf");
+	campFire.LoadGLTF("assets/campfire.gltf");
+	trees.LoadGLTF("assets/trees.gltf");
+	beachFull.LoadGLTF("assets/beach.gltf");
+
+	
 
 	pipeline.CreatePipeline();
 	pipeline.LoadShaders("shaders/vs_model.glsl", "shaders/fs_model.glsl");
@@ -350,8 +365,15 @@ void render()
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "view_matrix"), 1, GL_FALSE, &viewMatrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "proj_matrix"), 1, GL_FALSE, &projMatrix[0][0]);
 
-	raft.DrawModel(raft.vaoAndEbos, raft.model);
-	rocks.DrawModel(rocks.vaoAndEbos, rocks.model);
+	//Drawing each loaded model from blender project
+	raft.DrawModel(raft.vaoAndEbos, raft.model);			
+	rocks.DrawModel(rocks.vaoAndEbos, rocks.model);			
+	lifebuoy.DrawModel(lifebuoy.vaoAndEbos, lifebuoy.model); 
+	campFireSeats.DrawModel(campFireSeats.vaoAndEbos, campFireSeats.model);
+	campFire.DrawModel(campFire.vaoAndEbos, campFire.model);
+	trees.DrawModel(trees.vaoAndEbos, trees.model);
+	beachFull.DrawModel(beachFull.vaoAndEbos, beachFull.model);
+
 	
 	#if defined(__APPLE__)
 		glCheckError();
