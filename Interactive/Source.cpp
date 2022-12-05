@@ -73,11 +73,15 @@ void onMouseMoveCallback(GLFWwindow *window, double x, double y);
 void onMouseWheelCallback(GLFWwindow *window, double xoffset, double yoffset);
 
 //creating a struct to store content and matrix for each model individually (editable further in scene)
-/*struct renderObject {
+struct renderObject {
 	Content c;
-	mat4 objectMatrix;
+	vec3 modRotation;
+	vec3 modPosition;
+	mat4 translateMatrix;
+	mat4 rotateMatrix;
+	mat4 scaleMatrix;
 };
-*/
+
 
 // VARIABLES
 GLFWwindow *window; 								// Keep track of the window
@@ -98,13 +102,13 @@ auto lastTime = 0.0f;								// Used to calculate Frame rate
 Pipeline pipeline;									// Add one pipeline plus some shaders.									// Add one content loader (+drawing).
 
 //declaring each object exported from blender project
-Content raft;										
-Content rocks;										
-Content lifebuoy;									
-Content campFireSeats;								
-Content campFire;
-Content trees;
-Content beachFull;
+renderObject raft;										
+renderObject rocks;										
+renderObject lifebuoy;									
+renderObject campFireSeats;
+renderObject campFire;
+renderObject trees;
+renderObject beachFull;
 
 Debugger debugger;									// Add one debugger to use for callbacks ( Win64 - openGLDebugCallback() ) or manual calls ( Apple - glCheckError() ) 
 
@@ -253,15 +257,13 @@ void startup()
 	cout << endl << "Loading content..." << endl;	
 	
 	//Loading each exported GLTF object from blender project
-	raft.LoadGLTF("assets/raft.gltf");						
-	rocks.LoadGLTF("assets/rocks.gltf");					
-	lifebuoy.LoadGLTF("assets/lifebuoy.gltf");				
-	campFireSeats.LoadGLTF("assets/campfireseat.gltf");
-	campFire.LoadGLTF("assets/campfire.gltf");
-	trees.LoadGLTF("assets/trees.gltf");
-	beachFull.LoadGLTF("assets/beach.gltf");
-
-	
+	raft.c.LoadGLTF("assets/raft.gltf");						
+	rocks.c.LoadGLTF("assets/rocks.gltf");					
+	lifebuoy.c.LoadGLTF("assets/lifebuoy.gltf");				
+	campFireSeats.c.LoadGLTF("assets/campfireseat.gltf");
+	campFire.c.LoadGLTF("assets/campfire.gltf");
+	trees.c.LoadGLTF("assets/trees.gltf");
+	beachFull.c.LoadGLTF("assets/beach.gltf");
 
 	pipeline.CreatePipeline();
 	pipeline.LoadShaders("shaders/vs_model.glsl", "shaders/fs_model.glsl");
@@ -269,6 +271,18 @@ void startup()
 	// Start from the centre
 	modelPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 	modelRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	//Start position for raft
+	raft.modPosition = glm::vec3(0.0f, 2.0f, 0.0f); //start from centre + 2 up on y
+	raft.modRotation = glm::vec3(45.0f, 0.0f, 0.0f); //rotate 45 degrees on the x axis for raft
+
+	//Start position for rocks
+	rocks.modPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	rocks.modRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	//Start position for lifebuoy
+	lifebuoy.modPosition = glm::vec3(5.0f, 0.0f, 0.0f);
+	lifebuoy.modRotation = glm::vec3(45.0f, 0.0f, 0.0f);
 
 	// A few optimizations.
 	glFrontFace(GL_CCW);
@@ -289,7 +303,7 @@ void startup()
 void update()
 {
 	//rotation for the model (comes with the template)
-	if (keyStatus[GLFW_KEY_LEFT]) modelRotation.y += 0.05f;
+	if (keyStatus[GLFW_KEY_LEFT]) modelRotation.y += 0.05f; 
 	if (keyStatus[GLFW_KEY_RIGHT]) modelRotation.y -= 0.05f;
 	if (keyStatus[GLFW_KEY_UP]) modelRotation.x += 0.05f;
 	if (keyStatus[GLFW_KEY_DOWN]) modelRotation.x -= 0.05f;
@@ -358,21 +372,42 @@ void render()
 	modelMatrix = glm::rotate(modelMatrix, modelRotation.z, glm::vec3(0.0f, 0.0f, 1.0f)); //added rotation for the z axis of the model
 
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
-
 	glm::mat4 mv_matrix = viewMatrix * modelMatrix;
+
+	//creating a model matrix for raft obj
+	raft.translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 1.5f, 5.0f));
+	raft.rotateMatrix = glm::rotate(raft.rotateMatrix, raft.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	raft.rotateMatrix = glm::rotate(raft.rotateMatrix, raft.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	raft.rotateMatrix = glm::rotate(raft.rotateMatrix, raft.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	raft.scaleMatrix = glm::scale(raft.scaleMatrix, glm::vec3(1.0f, 1.0f, 3.0f));
+
+	glm::mat4 raftModelMatrix = raft.translateMatrix * raft.rotateMatrix * raft.scaleMatrix;
+	glm::mat4 raftTransformedMatrix = viewMatrix * raftModelMatrix;
+
+	//creating a model matrix for lifebuoy obj
+	lifebuoy.translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(5.0f, 0.5f, 0.0f));
+	lifebuoy.rotateMatrix = glm::rotate(lifebuoy.rotateMatrix, raft.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	lifebuoy.rotateMatrix = glm::rotate(lifebuoy.rotateMatrix, raft.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	lifebuoy.rotateMatrix = glm::rotate(lifebuoy.rotateMatrix, raft.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	lifebuoy.scaleMatrix = glm::scale(lifebuoy.scaleMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
+
+	glm::mat4 lifebuoyModelMatrix = lifebuoy.translateMatrix * lifebuoy.rotateMatrix * lifebuoy.scaleMatrix;
+	glm::mat4 lifebuoyTransformedMatrix = viewMatrix * lifebuoyModelMatrix;
+
+	//glm::mat4 mv_matrix = viewMatrix * modelMatrix;
 
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &modelMatrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "view_matrix"), 1, GL_FALSE, &viewMatrix[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "proj_matrix"), 1, GL_FALSE, &projMatrix[0][0]);
 
 	//Drawing each loaded model from blender project
-	raft.DrawModel(raft.vaoAndEbos, raft.model);			
-	rocks.DrawModel(rocks.vaoAndEbos, rocks.model);			
-	lifebuoy.DrawModel(lifebuoy.vaoAndEbos, lifebuoy.model); 
-	campFireSeats.DrawModel(campFireSeats.vaoAndEbos, campFireSeats.model);
-	campFire.DrawModel(campFire.vaoAndEbos, campFire.model);
-	trees.DrawModel(trees.vaoAndEbos, trees.model);
-	beachFull.DrawModel(beachFull.vaoAndEbos, beachFull.model);
+	raft.c.DrawModel(raft.c.vaoAndEbos, raft.c.model);			
+	rocks.c.DrawModel(rocks.c.vaoAndEbos, rocks.c.model);			
+	lifebuoy.c.DrawModel(lifebuoy.c.vaoAndEbos, lifebuoy.c.model); 
+	//campFireSeats.DrawModel(campFireSeats.vaoAndEbos, campFireSeats.model);
+	//campFire.DrawModel(campFire.vaoAndEbos, campFire.model);
+	//trees.DrawModel(trees.vaoAndEbos, trees.model);
+	//beachFull.DrawModel(beachFull.vaoAndEbos, beachFull.model);
 
 	
 	#if defined(__APPLE__)

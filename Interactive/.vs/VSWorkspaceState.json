@@ -1,6 +1,12 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\include\\GLFW",
+    "\\lib",
+    "\\Progress Screenshots",
+    "\\shaders",
+    "\\src"
   ],
+  "SelectedNode": "\\src\\Content.hpp",
   "PreviewInSolutionExplorer": false
 }

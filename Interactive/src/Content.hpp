@@ -28,7 +28,7 @@ class Content {
 
 	private:
 
-		GLuint textureID;				//creating a map to store mesh
+		GLuint textureID;				//store textureIDs
 
 		// Loading
 		pair<GLuint, map<int, GLuint>> BindModel(Model &model);
