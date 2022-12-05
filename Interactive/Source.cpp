@@ -389,7 +389,7 @@ void render()
 	raft.modelMatrix = glm::rotate(raft.modelMatrix, raft.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	raft.modelMatrix = glm::rotate(raft.modelMatrix, raft.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	raft.modelMatrix = glm::rotate(raft.modelMatrix, raft.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	raft.modelMatrix = glm::scale(raft.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
+	raft.modelMatrix = glm::scale(raft.modelMatrix, glm::vec3(1.5f, 1.0f, 1.0f));
 
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &raft.modelMatrix[0][0]);
 	
@@ -415,7 +415,7 @@ void render()
 	lifebuoy.modelMatrix = glm::rotate(lifebuoy.modelMatrix, lifebuoy.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	lifebuoy.modelMatrix = glm::rotate(lifebuoy.modelMatrix, lifebuoy.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	lifebuoy.modelMatrix = glm::rotate(lifebuoy.modelMatrix, lifebuoy.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	lifebuoy.modelMatrix = glm::scale(lifebuoy.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
+	lifebuoy.modelMatrix = glm::scale(lifebuoy.modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
 
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &lifebuoy.modelMatrix[0][0]);
 
@@ -427,7 +427,7 @@ void render()
 	campFireSeats.modelMatrix = glm::rotate(campFireSeats.modelMatrix, campFireSeats.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	campFireSeats.modelMatrix = glm::rotate(campFireSeats.modelMatrix, campFireSeats.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	campFireSeats.modelMatrix = glm::rotate(campFireSeats.modelMatrix, campFireSeats.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	campFireSeats.modelMatrix = glm::scale(campFireSeats.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
+	campFireSeats.modelMatrix = glm::scale(campFireSeats.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &campFireSeats.modelMatrix[0][0]);
 
@@ -439,7 +439,7 @@ void render()
 	campFire.modelMatrix = glm::rotate(campFire.modelMatrix, campFire.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	campFire.modelMatrix = glm::rotate(campFire.modelMatrix, campFire.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	campFire.modelMatrix = glm::rotate(campFire.modelMatrix, campFire.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	campFire.modelMatrix = glm::scale(campFire.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
+	campFire.modelMatrix = glm::scale(campFire.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &campFire.modelMatrix[0][0]);
 
@@ -451,7 +451,7 @@ void render()
 	trees.modelMatrix = glm::rotate(trees.modelMatrix, trees.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	trees.modelMatrix = glm::rotate(trees.modelMatrix, trees.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	trees.modelMatrix = glm::rotate(trees.modelMatrix, trees.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	trees.modelMatrix = glm::scale(trees.modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));;
+	trees.modelMatrix = glm::scale(trees.modelMatrix, glm::vec3(0.1f, 0.15f, 0.1f));;
 
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &trees.modelMatrix[0][0]);
 
@@ -472,7 +472,7 @@ void render()
 	beachFull.modelMatrix = glm::rotate(beachFull.modelMatrix, beachFull.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	beachFull.modelMatrix = glm::rotate(beachFull.modelMatrix, beachFull.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	beachFull.modelMatrix = glm::rotate(beachFull.modelMatrix, beachFull.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	beachFull.modelMatrix = glm::scale(beachFull.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	beachFull.modelMatrix = glm::scale(beachFull.modelMatrix, glm::vec3(3.0f, 1.0f, 10.0f));
 
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &beachFull.modelMatrix[0][0]);
 
