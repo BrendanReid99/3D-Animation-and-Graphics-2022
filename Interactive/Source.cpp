@@ -77,9 +77,7 @@ struct renderObject {
 	Content c;
 	vec3 modRotation;
 	vec3 modPosition;
-	mat4 translateMatrix;
-	mat4 rotateMatrix;
-	mat4 scaleMatrix;
+	mat4 modelMatrix;
 };
 
 
@@ -109,6 +107,7 @@ renderObject campFireSeats;
 renderObject campFire;
 renderObject trees;
 renderObject beachFull;
+renderObject sand;
 
 Debugger debugger;									// Add one debugger to use for callbacks ( Win64 - openGLDebugCallback() ) or manual calls ( Apple - glCheckError() ) 
 
@@ -263,26 +262,43 @@ void startup()
 	campFireSeats.c.LoadGLTF("assets/campfireseat.gltf");
 	campFire.c.LoadGLTF("assets/campfire.gltf");
 	trees.c.LoadGLTF("assets/trees.gltf");
+	//sand.c.LoadGLTF("assets/sand.gltf");
 	beachFull.c.LoadGLTF("assets/beach.gltf");
 
 	pipeline.CreatePipeline();
 	pipeline.LoadShaders("shaders/vs_model.glsl", "shaders/fs_model.glsl");
 
-	// Start from the centre
-	modelPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-	modelRotation = glm::vec3(0.0f, 0.0f, 0.0f);
-
 	//Start position for raft
-	raft.modPosition = glm::vec3(0.0f, 2.0f, 0.0f); //start from centre + 2 up on y
-	raft.modRotation = glm::vec3(45.0f, 0.0f, 0.0f); //rotate 45 degrees on the x axis for raft
+	raft.modPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	raft.modRotation = glm::vec3(0.0f, 0.0f, 0.0f); 
 
 	//Start position for rocks
 	rocks.modPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 	rocks.modRotation = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	//Start position for lifebuoy
-	lifebuoy.modPosition = glm::vec3(5.0f, 0.0f, 0.0f);
-	lifebuoy.modRotation = glm::vec3(45.0f, 0.0f, 0.0f);
+	lifebuoy.modPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	lifebuoy.modRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	//Start position for camp fire seats
+	campFireSeats.modPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	campFireSeats.modRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	//Start position for camp fire
+	campFire.modPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	campFire.modRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	//Start position for trees
+	trees.modPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	trees.modRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	//Start position for beach
+	//sand.modPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	//sand.modRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	//Start position for beach
+	beachFull.modPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	beachFull.modRotation = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	// A few optimizations.
 	glFrontFace(GL_CCW);
@@ -302,6 +318,7 @@ void startup()
 
 void update()
 {
+	//FIX TO DEAL WITH OBJECT (INDIVIDUALLY)
 	//rotation for the model (comes with the template)
 	if (keyStatus[GLFW_KEY_LEFT]) modelRotation.y += 0.05f; 
 	if (keyStatus[GLFW_KEY_RIGHT]) modelRotation.y -= 0.05f;
@@ -327,10 +344,10 @@ void update()
 		cameraPosition.y -= 0.05f;
 	}
 	if (keyStatus[GLFW_KEY_O]) {
-		cameraPosition.z += 0.05f;
+		cameraPosition.z += 0.10f;
 	}
 	if (keyStatus[GLFW_KEY_P]) {
-		cameraPosition.z -= 0.05f;
+		cameraPosition.z -= 0.10f;
 	}
 
 	// Start the Dear ImGui frame
@@ -364,140 +381,104 @@ void render()
 									   cameraPosition + cameraFront, // centre
 									   cameraUp);					 // up
 
-	// Do some translations, rotations and scaling
-	// glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(modelPosition.x+rX, modelPosition.y+rY, modelPosition.z+rZ));
-	//glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	//modelMatrix = glm::rotate(modelMatrix, modelRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	//modelMatrix = glm::rotate(modelMatrix, modelRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	//modelMatrix = glm::rotate(modelMatrix, modelRotation.z, glm::vec3(0.0f, 0.0f, 1.0f)); //added rotation for the z axis of the model
-
-	//modelMatrix = glm::scale(modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
-	//glm::mat4 mv_matrix = viewMatrix * modelMatrix;
-
-	//glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &modelMatrix[0][0]);
-	//glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "view_matrix"), 1, GL_FALSE, &viewMatrix[0][0]);
-	//glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "proj_matrix"), 1, GL_FALSE, &projMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "view_matrix"), 1, GL_FALSE, &viewMatrix[0][0]);	//sets these uniforms for shaders, refactoring here as repeated code in template
+	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "proj_matrix"), 1, GL_FALSE, &projMatrix[0][0]);
 
 	//creating a model matrix for raft obj
-	raft.translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	raft.rotateMatrix = glm::rotate(raft.rotateMatrix, raft.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	raft.rotateMatrix = glm::rotate(raft.rotateMatrix, raft.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	raft.rotateMatrix = glm::rotate(raft.rotateMatrix, raft.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	raft.scaleMatrix = glm::scale(raft.scaleMatrix, glm::vec3(3.0f, 2.0f, 1.2f));
+	raft.modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	raft.modelMatrix = glm::rotate(raft.modelMatrix, raft.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	raft.modelMatrix = glm::rotate(raft.modelMatrix, raft.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	raft.modelMatrix = glm::rotate(raft.modelMatrix, raft.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	raft.modelMatrix = glm::scale(raft.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
 
-	glm::mat4 raftModelMatrix = raft.translateMatrix * raft.rotateMatrix * raft.scaleMatrix;
-	glm::mat4 raftTransformedMatrix = viewMatrix * raftModelMatrix;
-
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &raftModelMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "view_matrix"), 1, GL_FALSE, &viewMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "proj_matrix"), 1, GL_FALSE, &projMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &raft.modelMatrix[0][0]);
+	
 
 	//Drawing loaded raft model from blender project
 	raft.c.DrawModel(raft.c.vaoAndEbos, raft.c.model);
 
 	//creating a model matrix for rocks obj
-	rocks.translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	rocks.rotateMatrix = glm::rotate(rocks.rotateMatrix, rocks.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	rocks.rotateMatrix = glm::rotate(rocks.rotateMatrix, rocks.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	rocks.rotateMatrix = glm::rotate(rocks.rotateMatrix, rocks.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	rocks.scaleMatrix = glm::scale(rocks.scaleMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
+	rocks.modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	rocks.modelMatrix = glm::rotate(rocks.modelMatrix, rocks.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	rocks.modelMatrix = glm::rotate(rocks.modelMatrix, rocks.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	rocks.modelMatrix = glm::rotate(rocks.modelMatrix, rocks.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	rocks.modelMatrix = glm::scale(rocks.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
 
-	glm::mat4 rocksModelMatrix = rocks.translateMatrix * rocks.rotateMatrix * rocks.scaleMatrix;
-	glm::mat4 rocksTransformedMatrix = viewMatrix * rocksModelMatrix;
+	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &rocks.modelMatrix[0][0]);
 
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &rocksModelMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "view_matrix"), 1, GL_FALSE, &viewMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "proj_matrix"), 1, GL_FALSE, &projMatrix[0][0]);
 
 	//Drawing loaded raft model from blender project
 	rocks.c.DrawModel(rocks.c.vaoAndEbos, rocks.c.model);
 
 	//creating a model matrix for lifebuoy model
-	lifebuoy.translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	lifebuoy.rotateMatrix = glm::rotate(lifebuoy.rotateMatrix, lifebuoy.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	lifebuoy.rotateMatrix = glm::rotate(lifebuoy.rotateMatrix, lifebuoy.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	lifebuoy.rotateMatrix = glm::rotate(lifebuoy.rotateMatrix, lifebuoy.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	lifebuoy.scaleMatrix = glm::scale(lifebuoy.scaleMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
+	lifebuoy.modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	lifebuoy.modelMatrix = glm::rotate(lifebuoy.modelMatrix, lifebuoy.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	lifebuoy.modelMatrix = glm::rotate(lifebuoy.modelMatrix, lifebuoy.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	lifebuoy.modelMatrix = glm::rotate(lifebuoy.modelMatrix, lifebuoy.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	lifebuoy.modelMatrix = glm::scale(lifebuoy.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
 
-	glm::mat4 lifebuoyModelMatrix = lifebuoy.translateMatrix * lifebuoy.rotateMatrix * lifebuoy.scaleMatrix;
-	glm::mat4 lifebuoyTransformedMatrix = viewMatrix * lifebuoyModelMatrix;
-
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &lifebuoyModelMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "view_matrix"), 1, GL_FALSE, &viewMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "proj_matrix"), 1, GL_FALSE, &projMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &lifebuoy.modelMatrix[0][0]);
 
 	//Drawing lifebuoy model from blender project			
 	lifebuoy.c.DrawModel(lifebuoy.c.vaoAndEbos, lifebuoy.c.model);
 
 	//creating a model matrix for camp fire seats model
-	campFireSeats.translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	campFireSeats.rotateMatrix = glm::rotate(campFireSeats.rotateMatrix, campFireSeats.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	campFireSeats.rotateMatrix = glm::rotate(campFireSeats.rotateMatrix, campFireSeats.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	campFireSeats.rotateMatrix = glm::rotate(campFireSeats.rotateMatrix, campFireSeats.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	campFireSeats.scaleMatrix = glm::scale(campFireSeats.scaleMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
+	campFireSeats.modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	campFireSeats.modelMatrix = glm::rotate(campFireSeats.modelMatrix, campFireSeats.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	campFireSeats.modelMatrix = glm::rotate(campFireSeats.modelMatrix, campFireSeats.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	campFireSeats.modelMatrix = glm::rotate(campFireSeats.modelMatrix, campFireSeats.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	campFireSeats.modelMatrix = glm::scale(campFireSeats.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
 
-	glm::mat4 campSeatsModelMatrix = campFireSeats.translateMatrix * campFireSeats.rotateMatrix * campFireSeats.scaleMatrix;
-	glm::mat4 campSeatsTransformedMatrix = viewMatrix * campSeatsModelMatrix;
-
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &campSeatsModelMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "view_matrix"), 1, GL_FALSE, &viewMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "proj_matrix"), 1, GL_FALSE, &projMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &campFireSeats.modelMatrix[0][0]);
 
 	//Drawing camp fire seats model			
 	campFireSeats.c.DrawModel(campFireSeats.c.vaoAndEbos, campFireSeats.c.model);
 
 	//creating a model matrix for camp fire model
-	campFire.translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	campFire.rotateMatrix = glm::rotate(campFire.rotateMatrix, campFire.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	campFire.rotateMatrix = glm::rotate(campFire.rotateMatrix, campFire.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	campFire.rotateMatrix = glm::rotate(campFire.rotateMatrix, campFire.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	campFire.scaleMatrix = glm::scale(campFire.scaleMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
+	campFire.modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	campFire.modelMatrix = glm::rotate(campFire.modelMatrix, campFire.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	campFire.modelMatrix = glm::rotate(campFire.modelMatrix, campFire.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	campFire.modelMatrix = glm::rotate(campFire.modelMatrix, campFire.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	campFire.modelMatrix = glm::scale(campFire.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
 
-	glm::mat4 campFireModelMatrix = campFire.translateMatrix * campFire.rotateMatrix * campFire.scaleMatrix;
-	glm::mat4 campFireTransformedMatrix = viewMatrix * campFireModelMatrix;
-
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &campFireModelMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "view_matrix"), 1, GL_FALSE, &viewMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "proj_matrix"), 1, GL_FALSE, &projMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &campFire.modelMatrix[0][0]);
 
 	//Drawing camp fire seats model 			
 	campFire.c.DrawModel(campFire.c.vaoAndEbos, campFire.c.model);
 
 	//creating a model matrix for trees model
-	trees.translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	trees.rotateMatrix = glm::rotate(trees.rotateMatrix, trees.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	trees.rotateMatrix = glm::rotate(trees.rotateMatrix, trees.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	trees.rotateMatrix = glm::rotate(trees.rotateMatrix, trees.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	trees.scaleMatrix = glm::scale(trees.scaleMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
+	trees.modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	trees.modelMatrix = glm::rotate(trees.modelMatrix, trees.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	trees.modelMatrix = glm::rotate(trees.modelMatrix, trees.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	trees.modelMatrix = glm::rotate(trees.modelMatrix, trees.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	trees.modelMatrix = glm::scale(trees.modelMatrix, glm::vec3(0.0f, 0.0f, 0.0f));;
 
-	glm::mat4 treesModelMatrix = trees.translateMatrix * trees.rotateMatrix * trees.scaleMatrix;
-	glm::mat4 treesTransformedMatrix = viewMatrix * treesModelMatrix;
-
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &treesModelMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "view_matrix"), 1, GL_FALSE, &viewMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "proj_matrix"), 1, GL_FALSE, &projMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &trees.modelMatrix[0][0]);
 
 	//Drawing camp fire seats model from blender project			
 	trees.c.DrawModel(trees.c.vaoAndEbos, trees.c.model);
 
+	////creating a model matrix for trees model
+	//sand.modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	//sand.modelMatrix = glm::rotate(sand.modelMatrix, sand.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	//sand.modelMatrix = glm::rotate(sand.modelMatrix, sand.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	//sand.modelMatrix = glm::rotate(sand.modelMatrix, sand.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	//sand.modelMatrix = glm::scale(sand.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+
+	//glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &sand.modelMatrix[0][0]);
+
 	//creating a model matrix for trees model
-	beachFull.translateMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	beachFull.rotateMatrix = glm::rotate(beachFull.rotateMatrix, beachFull.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-	beachFull.rotateMatrix = glm::rotate(beachFull.rotateMatrix, beachFull.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-	beachFull.rotateMatrix = glm::rotate(beachFull.rotateMatrix, beachFull.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	beachFull.scaleMatrix = glm::scale(beachFull.scaleMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
+	beachFull.modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	beachFull.modelMatrix = glm::rotate(beachFull.modelMatrix, beachFull.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	beachFull.modelMatrix = glm::rotate(beachFull.modelMatrix, beachFull.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+	beachFull.modelMatrix = glm::rotate(beachFull.modelMatrix, beachFull.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+	beachFull.modelMatrix = glm::scale(beachFull.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
 
-	glm::mat4 beachModelMatrix = beachFull.translateMatrix * beachFull.rotateMatrix * beachFull.scaleMatrix;
-	glm::mat4 beachTransformedMatrix = viewMatrix * beachModelMatrix;
-
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &beachModelMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "view_matrix"), 1, GL_FALSE, &viewMatrix[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "proj_matrix"), 1, GL_FALSE, &projMatrix[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &beachFull.modelMatrix[0][0]);
 
 	//Drawing camp fire seats model from blender project			
 	beachFull.c.DrawModel(beachFull.c.vaoAndEbos, beachFull.c.model);
 
-	
 	#if defined(__APPLE__)
 		glCheckError();
 	#endif
