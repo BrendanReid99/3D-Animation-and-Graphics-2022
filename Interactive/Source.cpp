@@ -310,7 +310,7 @@ void startup()
 	//Start position, rotation and scale for trees
 	renderObjectsList[5].modPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 	renderObjectsList[5].modRotation = glm::vec3(0.0f, 0.0f, 0.0f);
-	renderObjectsList[5].scale = glm::vec3(0.01f, 0.02f, 0.01f);
+	renderObjectsList[5].scale = glm::vec3(0.05f, 0.02f, 0.01f);
 
 	//Start position, rotation and scale for beach
 	renderObjectsList[6].modPosition = glm::vec3(0.0f, 0.0f, 0.0f);
