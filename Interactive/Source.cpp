@@ -116,12 +116,13 @@ vec3 modelRotation;									// Model rotation
 
 //adding in variables for lighting equation 
 vec3 ia = vec3(1.0f, 1.0f, 1.0f);			// Ambient colour
-float ka;									// Ambient constant
+float ka = 1.5f;									// Ambient constant
 vec3 id = vec3(0.9f, 0.9f, 0.9f);			// diffuse colour
-float kd;									// Diffuse constant
-vec3 is = vec3(0.6, 0.8, 0.6);				// specular colour
-float ks;									// specular constant
+float kd = 1.5f;									// Diffuse constant
+vec3 is = vec3(0.6f, 0.8f, 0.6f);			// specular colour
+float ks = 1.5f;									// specular constant
 float shininess;							// shininess constant
+
 vec3 lightPos = vec3(-3.0f, 4.0f, 6.0f);	//setting light position
 
 
@@ -375,6 +376,25 @@ void update()
 		lightPos.x += 0.05f;
 	}
 
+	//interactive keys for light strength (altering ambient,diffuse and specular lighting strengths)
+	if (keyStatus[GLFW_KEY_0]) {			//ambient +
+		ka += 0.05f;
+	}
+	if (keyStatus[GLFW_KEY_1]) {			//ambient -
+		ka -= 0.05f;
+	}
+	if (keyStatus[GLFW_KEY_2]) {			//diffuse +
+		kd += 0.05f;
+	}
+	if (keyStatus[GLFW_KEY_3]) {			//diffuse -
+		kd -= 0.05f;
+	}
+	if (keyStatus[GLFW_KEY_4]) {			//specular +
+		ks += 0.05f;
+	}
+	if (keyStatus[GLFW_KEY_5]) {			//specular -
+		ks -= 0.05f;
+	}
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -487,7 +507,7 @@ void render()
 	trees.modelMatrix = glm::rotate(trees.modelMatrix, trees.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	trees.modelMatrix = glm::rotate(trees.modelMatrix, trees.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	trees.modelMatrix = glm::rotate(trees.modelMatrix, trees.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	trees.modelMatrix = glm::scale(trees.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));;
+	trees.modelMatrix = glm::scale(trees.modelMatrix, glm::vec3(0.05f, 0.05f, 0.05f));;
 
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &trees.modelMatrix[0][0]);
 
@@ -548,6 +568,9 @@ void ui()
 		ImGui::Text("About: 3D Graphics and Animation 2022"); // ImGui::Separator();
 		ImGui::Text("Performance: %.3fms/Frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Text("Pipeline: %s", pipeline.pipe.error?"ERROR":"OK");
+		ImGui::Text("ka: %.01f", ka);	//adding in text to watch numerical value of ambient colour
+		ImGui::Text("kd: %.01f", kd);	//adding in text to watch numerical value of diffuse colour
+		ImGui::Text("ks: %.01f", ks);	//adding in text to watch numerical value of specular colour
 	}
 	ImGui::End();
 
