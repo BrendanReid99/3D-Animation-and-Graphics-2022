@@ -377,6 +377,12 @@ void update()
 		renderObjectsList[selectedObjIdx].modPosition.y -= 0.05f;		//--POSITION OF X
 	}
 
+	/*
+	* Obviously you could do things here like manipulate the scale of each object as well etc... 
+	* I just didn't think it was necessary to add here as rather obvious! Have done start scales in the startup func however and is possible to scale each object
+	* accordingly there. In theory, my model should scale to what my blender project does, however there is clear issues with the export process!
+	*/
+
 	//RELOAD SHADERS USING R KEY
 	if (keyStatus[GLFW_KEY_R]) pipeline.ReloadShaders();
 
