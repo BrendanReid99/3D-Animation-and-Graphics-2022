@@ -114,6 +114,16 @@ Debugger debugger;									// Add one debugger to use for callbacks ( Win64 - op
 vec3 modelPosition;									// Model position
 vec3 modelRotation;									// Model rotation
 
+//adding in variables for lighting equation 
+vec3 ia = vec3(1.0f, 1.0f, 1.0f);			// Ambient colour
+float ka;									// Ambient constant
+vec3 id = vec3(0.9f, 0.9f, 0.9f);			// diffuse colour
+float kd;									// Diffuse constant
+vec3 is = vec3(0.6, 0.8, 0.6);				// specular colour
+float ks;									// specular constant
+float shininess;							// shininess constant
+vec3 lightPos = vec3(-3.0f, 4.0f, 6.0f);	//setting light position
+
 
 int main()
 {
@@ -350,6 +360,21 @@ void update()
 		cameraPosition.z -= 0.10f;
 	}
 
+	//interactive keys for the lights
+	//add or decrease the lights
+	if (keyStatus[GLFW_KEY_U]) {
+		lightPos.y += 0.05f;
+	}
+	if (keyStatus[GLFW_KEY_J]) {
+		lightPos.y += 0.05f;
+	}
+	if (keyStatus[GLFW_KEY_H]) {
+		lightPos.x += 0.05f;
+	}
+	if (keyStatus[GLFW_KEY_L]) {
+		lightPos.x += 0.05f;
+	}
+
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -384,12 +409,23 @@ void render()
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "view_matrix"), 1, GL_FALSE, &viewMatrix[0][0]);	//sets these uniforms for shaders, refactoring here as repeated code in template
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "proj_matrix"), 1, GL_FALSE, &projMatrix[0][0]);
 
+	//adding a pipeline for lighting (rendering before draw) using phong's lighting from lab
+	glUniform4f(glGetUniformLocation(pipeline.pipe.program, "viewPosition"), cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0);
+	glUniform4f(glGetUniformLocation(pipeline.pipe.program, "lightPosition"), lightPos.x, lightPos.y, lightPos.z, 1.0);
+	glUniform4f(glGetUniformLocation(pipeline.pipe.program, "ia"), ia.r, ia.g, ia.b, 1.0);
+	glUniform1f(glGetUniformLocation(pipeline.pipe.program, "ka"), ka);
+	glUniform4f(glGetUniformLocation(pipeline.pipe.program, "id"), id.r, id.g, id.b, 1.0);
+	glUniform1f(glGetUniformLocation(pipeline.pipe.program, "kd"), 1.0f);
+	glUniform4f(glGetUniformLocation(pipeline.pipe.program, "is"), is.r, is.g, is.b, 1.0);
+	glUniform1f(glGetUniformLocation(pipeline.pipe.program, "ks"), 1.0f);
+	glUniform1f(glGetUniformLocation(pipeline.pipe.program, "shininess"), 32.0f);
+
 	//creating a model matrix for raft obj
 	raft.modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 	raft.modelMatrix = glm::rotate(raft.modelMatrix, raft.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	raft.modelMatrix = glm::rotate(raft.modelMatrix, raft.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	raft.modelMatrix = glm::rotate(raft.modelMatrix, raft.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	raft.modelMatrix = glm::scale(raft.modelMatrix, glm::vec3(1.5f, 1.0f, 1.0f));
+	raft.modelMatrix = glm::scale(raft.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
 
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &raft.modelMatrix[0][0]);
 	
@@ -415,7 +451,7 @@ void render()
 	lifebuoy.modelMatrix = glm::rotate(lifebuoy.modelMatrix, lifebuoy.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	lifebuoy.modelMatrix = glm::rotate(lifebuoy.modelMatrix, lifebuoy.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	lifebuoy.modelMatrix = glm::rotate(lifebuoy.modelMatrix, lifebuoy.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	lifebuoy.modelMatrix = glm::scale(lifebuoy.modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
+	lifebuoy.modelMatrix = glm::scale(lifebuoy.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
 
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &lifebuoy.modelMatrix[0][0]);
 
@@ -427,7 +463,7 @@ void render()
 	campFireSeats.modelMatrix = glm::rotate(campFireSeats.modelMatrix, campFireSeats.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	campFireSeats.modelMatrix = glm::rotate(campFireSeats.modelMatrix, campFireSeats.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	campFireSeats.modelMatrix = glm::rotate(campFireSeats.modelMatrix, campFireSeats.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	campFireSeats.modelMatrix = glm::scale(campFireSeats.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	campFireSeats.modelMatrix = glm::scale(campFireSeats.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
 
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &campFireSeats.modelMatrix[0][0]);
 
@@ -439,7 +475,7 @@ void render()
 	campFire.modelMatrix = glm::rotate(campFire.modelMatrix, campFire.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	campFire.modelMatrix = glm::rotate(campFire.modelMatrix, campFire.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	campFire.modelMatrix = glm::rotate(campFire.modelMatrix, campFire.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	campFire.modelMatrix = glm::scale(campFire.modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+	campFire.modelMatrix = glm::scale(campFire.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));
 
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &campFire.modelMatrix[0][0]);
 
@@ -451,7 +487,7 @@ void render()
 	trees.modelMatrix = glm::rotate(trees.modelMatrix, trees.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	trees.modelMatrix = glm::rotate(trees.modelMatrix, trees.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	trees.modelMatrix = glm::rotate(trees.modelMatrix, trees.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	trees.modelMatrix = glm::scale(trees.modelMatrix, glm::vec3(0.1f, 0.15f, 0.1f));;
+	trees.modelMatrix = glm::scale(trees.modelMatrix, glm::vec3(1.2f, 1.2f, 1.2f));;
 
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &trees.modelMatrix[0][0]);
 
@@ -472,7 +508,7 @@ void render()
 	beachFull.modelMatrix = glm::rotate(beachFull.modelMatrix, beachFull.modRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 	beachFull.modelMatrix = glm::rotate(beachFull.modelMatrix, beachFull.modRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 	beachFull.modelMatrix = glm::rotate(beachFull.modelMatrix, beachFull.modRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-	beachFull.modelMatrix = glm::scale(beachFull.modelMatrix, glm::vec3(3.0f, 1.0f, 10.0f));
+	beachFull.modelMatrix = glm::scale(beachFull.modelMatrix, glm::vec3(3.0f, 1.2f, 10.0f));
 
 	glUniformMatrix4fv(glGetUniformLocation(pipeline.pipe.program, "model_matrix"), 1, GL_FALSE, &beachFull.modelMatrix[0][0]);
 
