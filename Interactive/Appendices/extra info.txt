@@ -1,0 +1,5 @@
+Assets folder contains the gltf files and their related textures. 
+
+Shaders folder was updated, you should check these out!
+
+The other stuff here is from camille's CMake thing you authorised to be shared with students. You can just look at my source.cpp, content.cpp and their related header files here.
